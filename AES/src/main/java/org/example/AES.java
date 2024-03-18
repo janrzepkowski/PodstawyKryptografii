@@ -36,4 +36,30 @@ public class AES {
         }
         return sb.toString();
     }
+
+    public int[][] ShiftRows(int[][] table) {
+        int i = 1;
+        int temp = table[i][0];
+        table[i][0] = table[i][1];
+        table[i][1] = table[i][2];
+        table[i][2] = table[i][3];
+        table[i][3] = temp;
+        i++;
+
+        temp = table[i][0];
+        table[i][0] = table[i][2];
+        table[i][2] = temp;
+        temp = table[i][3];
+        table[i][3] = table[i][1];
+        table[i][1] = temp;
+        i++;
+
+        temp = table[i][0];
+        table[i][0] = table[i][3];
+        table[i][3] = table[i][2];
+        table[i][2] = table[i][1];
+        table[i][1] = temp;
+
+        return table;
+    }
 }
