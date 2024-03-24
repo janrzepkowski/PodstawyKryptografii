@@ -63,7 +63,7 @@ class AESTest {
         String words = "dum spiro, spero – poki oddycham, nie trace nadziei."; // jezeli wiadomosc jest zbyt krotka to chyba (int)Math.sqrt(state1.length) = 0 i out of bounds error daje
         byte[] state1 = words.getBytes();
         byte[][] state2 = aes.array1Dto2D(state1, (int)Math.sqrt(state1.length), (int)Math.sqrt(state1.length));
-        byte[][] state3 = aes.subBytes(state2);
+        byte[][] state3 = aes.subBytes1(state2);
         assertEquals(67, state3[0][0]);
     }
 
