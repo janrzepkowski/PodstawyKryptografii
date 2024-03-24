@@ -33,7 +33,7 @@ public class AES {
         return array;
     }
 
-    public byte[][] ShiftRows(byte[][] table) {
+    public byte[][] shiftRows(byte[][] table) {
         byte i = 1;
         byte temp = table[i][0];
         table[i][0] = table[i][1];
@@ -219,18 +219,23 @@ public class AES {
         }
     }
 
-    public char[] mix(char[] table) {
-        char[] mix = new char[4];
+    public byte[] mix(byte[] table) {
+        byte[] mix = new byte[4];
         for (int i = 0; i < mix.length; i++) {
-            mix[i] = (char) ((multiply2[table[i]] ^ multiply3[table[(i + 1) % 4]] ^ table[(i + 2) % 4] ^ table[(i + 3) % 4]));
+            mix[i] = (byte) ((multiply2[Byte.toUnsignedInt(table[i])] ^
+                    multiply3[Byte.toUnsignedInt(table[(i + 1) % 4])] ^
+                    table[(i + 2) % 4] ^ table[(i + 3) % 4]));
         }
         return mix;
     }
 
-    public char[] cols(char[] table) {
-        char[] mix = new char[4];
+    public byte[] cols(byte[] table) {
+        byte[] mix = new byte[4];
         for (int i = 0; i < mix.length; i++) {
-            mix[i] = (char) (multiply14[table[i]] ^ multiply13[table[(i + 2) % 4]] ^ multiply11[table[(i + 1) % 4]] ^ multiply9[table[(i + 3) % 4]]);
+            mix[i] = (byte) (multiply14[Byte.toUnsignedInt(table[i])] ^
+                    multiply13[Byte.toUnsignedInt(table[(i + 2) % 4])] ^
+                    multiply11[Byte.toUnsignedInt(table[(i + 1) % 4])] ^
+                    multiply9[Byte.toUnsignedInt(table[(i + 3) % 4])]);
         }
         return mix;
     }
@@ -260,7 +265,7 @@ public class AES {
         return round;
     }
 
-    public byte addRoundKey(byte[][] key, byte round) {
+    public byte keySchedule(byte[][] key, byte round) { // TODO generate key to table for x rounds
         byte[][] newKey = new byte[4][4];
         byte[] lastWord = rotWord(key[3]);
         subWord(lastWord);
@@ -304,7 +309,16 @@ public class AES {
         return round;
     }
 
-
+    public byte[][] encode(byte[][] message, byte[][] key) {
+        byte round = 0;
+        for (int i = 0; i < 10; i++) {
+//            subBytes(message);
+//            shiftRows(message);
+//            mix(message);
+//            round = addRoundKey(key, round);
+        }
+        return message;
+    }
 
 
     public byte[][] subBytes1(byte[][] table) {

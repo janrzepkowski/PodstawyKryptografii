@@ -24,7 +24,7 @@ class AESTest {
         System.out.println(data.length);
         printTable(data);
         System.out.println();
-        printTable(aes.ShiftRows(data));
+        printTable(aes.shiftRows(data));
         assertTrue(true);
     }
 
@@ -35,22 +35,22 @@ class AESTest {
 //        aes.mixColumns(data[0]);
 //        printTable(data);
 //        char[] d = {45, 38, 49, 76};
-//        char[] d = {1, 1, 1, 1};
-        char[] d = {242, 10, 34, 92};
+//        byte[] d = {1, 1, 1, 1};
+        byte[] d = {(byte) 242, 10, 34, 92};
 //        char[] d = {198, 198, 198, 198};
-        for (char b : d) {
+        for (byte b : d) {
             int b1 = b;
             System.out.print(b1 + " ");
         }
         System.out.println();
-        char[] da = aes.mix(d);
-        for (char b : da) {
+        byte[] da = aes.mix(d);
+        for (byte b : da) {
             int b1 = b;
             System.out.print(b1 + " ");
         }
         System.out.println();
-        char[] f = aes.cols(da);
-        for (char b : f) {
+        byte[] f = aes.cols(da);
+        for (byte b : f) {
             int b1 = b;
             System.out.print(b1 + " ");
         }
@@ -111,7 +111,7 @@ class AESTest {
         byte[][] key = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         printTable(key);
         byte round = 1;
-        round = aes.addRoundKey(key, round);
+        round = aes.keySchedule(key, round);
         printTable(key);
         aes.invAddRoundKey(key, round);
         printTable(key);
