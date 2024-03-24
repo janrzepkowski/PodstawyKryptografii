@@ -17,10 +17,10 @@ class AESTest {
         }
     }
 
+    AES aes = new AES();
     byte[][] data = {{0, 4, 8, 12}, {1, 5, 9, 13}, {2, 6, 10, 14}, {3, 7, 11, 15}};
     @Test
     public void shiftRowsTest() {
-        AES aes = new AES();
         System.out.println(data.length);
         printTable(data);
         System.out.println();
@@ -30,7 +30,6 @@ class AESTest {
 
     @Test
     public void mixColumns() {
-        AES aes = new AES();
 //        printTable(data);
 //        System.out.println();
 //        aes.mixColumns(data[0]);
@@ -59,7 +58,6 @@ class AESTest {
 
     @Test
     public void subBytesTest() {
-        AES aes = new AES();
         String words = "dum spiro, spero – poki oddycham, nie trace nadziei."; // jezeli wiadomosc jest zbyt krotka to chyba (int)Math.sqrt(state1.length) = 0 i out of bounds error daje
         byte[] state1 = words.getBytes();
         byte[][] state2 = aes.array1Dto2D(state1, (int)Math.sqrt(state1.length), (int)Math.sqrt(state1.length));
@@ -78,7 +76,44 @@ class AESTest {
         byte[] state1 = words.getBytes();
         byte[][] state2 = aes.array1Dto2D(state1, (int)Math.sqrt(state1.length), (int)Math.sqrt(state1.length));
         printTable(state2);
-        byte[][] state3 = aes.addRoundKey(state2, key2d, 0);
+        byte[][] state3 = aes.addRoundKey1(state2, key2d, 0);
         printTable(state3);
+    }
+
+    @Test
+    void subBytes() {
+        printTable(data);
+        aes.subBytes(data);
+        printTable(data);
+        aes.invSubBytes(data);
+        printTable(data);
+    }
+
+    @Test
+    void rCon() {
+        int[] values = {1, 2, 4, 8, 16, 32, 64, -128, 27, 54};
+        int[] xoredValues = {3, 1, 5, 13, 29, 61, 125, -3, -26, -48};
+        byte val = 0;
+        for (byte i = 0; i < 10; i++) {
+            val = aes.rCon(data[3], val);
+            assertEquals(values[i], val);
+            assertEquals(data[3][0], xoredValues[i]);
+        }
+        for (byte i = 0; i < 10; i++) {
+            assertEquals(values[9 - i], val);
+            assertEquals(xoredValues[9 - i], data[3][0]);
+            val = aes.invRCon(data[3], val);
+        }
+    }
+
+    @Test
+    void addKeyRound() {
+        byte[][] key = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
+        printTable(key);
+        byte round = 1;
+        round = aes.addRoundKey(key, round);
+        printTable(key);
+        aes.invAddRoundKey(key, round);
+        printTable(key);
     }
 }
