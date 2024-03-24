@@ -3,23 +3,10 @@ package org.example;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
-import java.util.Scanner;
 
 public class AES {
-    public static void main(String[] args) throws NoSuchAlgorithmException {
-
-//        AES aes = new AES();
-//        Scanner scanner = new Scanner(System.in);
-//
-//        System.out.print("Podaj długość klucza w bitach (np. 128, 192, 256): ");
-//        int keySize = scanner.nextInt();
-//
-//        byte[] aesKeyBytes = aes.generateKey(keySize);
-//        String aesKeyHex = aes.byteArraytoString(aesKeyBytes);
-//
-//        System.out.println("Wygenerowany klucz AES (w formacie heksadecymalnym):");
-//        System.out.println(aesKeyHex);
-    }
+    private int nw;                         //Number of 32 bit words
+    private int nr;                         //Number of rounds in encipher
 
     public byte[] generateKey(int size) throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
@@ -213,6 +200,17 @@ public class AES {
     // 01100000 >> 4            |   00001111
     // 00000110 = hex 6         |   00000100 = hex 4
     //                  sbox[6][4] = hex 43 = dec 67
+
+    //dodanie XOR wszytskich bajtow macierzy do bajtow podklucza wlasciwego:
+    public byte[][] addRoundKey(byte[][] table, byte[][] key, int round) {
+        byte[][] modifiedTable = new byte[table.length][table[0].length];
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                modifiedTable[j][i] = (byte) (table[j][i] ^ key[round * 4 + i][j]);
+            }
+        }
+        return modifiedTable;
+    }
 
     public int[][] sBox = {
             {0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76},
