@@ -138,17 +138,21 @@ class AESTest {
         System.out.println();
 
         aes.encode(data, key);
-        byte[][] encodedData = new byte[data.length][];
-        for (int i = 0; i < data.length; i++) {
-            encodedData[i] =  Arrays.copyOf(data[i], data[i].length);
-        }
         printTable(data);
         System.out.println();
 
         aes.decode(data, key);
         printTable(data);
         assertTrue(Arrays.deepEquals(baseTable, data));
+        key = new byte[][]{{0, 4, 8, 12}, {1, 5, 9, 13}, {2, 6, 10, 14}, {3, 7, 11, 15}, {2, 6, 10, 14}, {3, 7, 11, 15}, {2, 6, 10, 14}, {3, 7, 11, 15}};
+        printTable(data);
+        System.out.println();
+
         aes.encodeExpansion(data, key);
+        byte[][] encodedData = new byte[data.length][];
+        for (int i = 0; i < data.length; i++) {
+            encodedData[i] =  Arrays.copyOf(data[i], data[i].length);
+        }
         assertTrue(Arrays.deepEquals(encodedData, data));
         aes.decodeExpansion(data, key);
         printTable(data);

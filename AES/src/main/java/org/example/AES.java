@@ -343,14 +343,16 @@ public class AES {
         }
     }
 
-    public byte[][] genKeySchedule128(byte[][] key) {
-        byte[][] keySchedule = new byte[44][];
+    public byte[][] genKeySchedule(byte[][] key) {
+        int columnNumber = key.length;
+        int initialSize = 44;
+        int size = initialSize + (columnNumber - 4) * 4;
+        byte[][] keySchedule = new byte[size][];
         for (int i = 0; i < key.length; i++) {
             keySchedule[i] = Arrays.copyOf(key[i], key[i].length);
         }
         byte roundConstant = 1;
-        int columnNumber = 4;
-        for (int i = columnNumber; i < 44; i++) {
+        for (int i = columnNumber; i < size; i++) {
             if (i % columnNumber == 0) {
                 keySchedule[i] = transform(keySchedule[i - 1], roundConstant);
                 keySchedule[i] = addWords(keySchedule[i], keySchedule[i - columnNumber]);
@@ -386,13 +388,16 @@ public class AES {
 
     public void encodeExpansion(byte[][] message, byte[][] key) {
         int keySize = key.length;
-        byte[][] keyExpansion = new byte[0][];
-        if (keySize == 4) {
-            keyExpansion = genKeySchedule128(key);
+        byte[][] keyExpansion;
+        if (keySize == 4 || keySize == 6 || keySize == 8) {
+            keyExpansion = genKeySchedule(key);
+        } else {
+            throw new IllegalArgumentException("Wrong key size");
         }
-        int rounds = keyExpansion.length / keySize;
+        int rounds = keyExpansion.length / 4;
         byte[][] roundKey;
         int startIndex;
+
         addRoundKey(message, key);
         for (int i = 0; i < rounds - 2; i++) {
             subBytes(message);
@@ -401,24 +406,28 @@ public class AES {
             startIndex = i * 4 + 4;
             roundKey = Arrays.copyOfRange(keyExpansion, startIndex, startIndex + 4);
             addRoundKey(message, roundKey);
-            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
+//            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
         }
         subBytes(message);
         shiftRows(message);
         startIndex = keyExpansion.length - 4;
+        System.out.println(rounds + " " + startIndex + " " + keyExpansion.length);
         roundKey = Arrays.copyOfRange(keyExpansion, startIndex, keyExpansion.length);
         addRoundKey(message, roundKey);
     }
 
     public void decodeExpansion(byte[][] message, byte[][] key) {
         int keySize = key.length;
-        byte[][] keyExpansion = new byte[0][];
-        if (keySize == 4) {
-            keyExpansion = genKeySchedule128(key);
+        byte[][] keyExpansion;
+        if (keySize == 4 || keySize == 6 || keySize == 8) {
+            keyExpansion = genKeySchedule(key);
+        } else {
+            throw new IllegalArgumentException("Wrong key size");
         }
-        int rounds = keyExpansion.length / keySize;
+        int rounds = keyExpansion.length / 4;
         byte[][] roundKey;
         int startIndex = keyExpansion.length - 4;
+
         System.out.println(rounds + " " + startIndex + " " + keyExpansion.length);
         roundKey = Arrays.copyOfRange(keyExpansion, startIndex, keyExpansion.length);
         addRoundKey(message, roundKey);
@@ -426,7 +435,7 @@ public class AES {
             invShiftRows(message);
             invSubBytes(message);
             startIndex = i * 4;
-            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
+//            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
             roundKey = Arrays.copyOfRange(keyExpansion, startIndex, startIndex + 4);
             addRoundKey(message, roundKey);
             invMixCols(message);
