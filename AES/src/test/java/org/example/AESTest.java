@@ -120,7 +120,21 @@ class AESTest {
         byte round = 1;
         round = aes.keySchedule(key, round);
         printTable(key);
-        aes.invAddRoundKey(key, round);
+        aes.invKeySchedule(key, round);
         printTable(key);
+    }
+
+    @Test
+    void encodingTest() {
+        byte[][] key = {{0, 4, 8, 12}, {1, 5, 9, 13}, {2, 6, 10, 14}, {3, 7, 11, 15}};
+        printTable(data);
+        System.out.println();
+
+        aes.encode(data, key);
+        printTable(data);
+        System.out.println();
+
+        aes.decode(data, key);
+        printTable(data);
     }
 }

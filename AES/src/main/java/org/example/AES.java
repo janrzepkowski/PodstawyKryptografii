@@ -228,7 +228,7 @@ public class AES {
     public void subBytes(byte[][] table) {
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table[i].length; j++) {
-                table[i][j] = (byte) sbox[table[i][j]];
+                table[i][j] = (byte) sbox[Byte.toUnsignedInt(table[i][j])];
             }
         }
     }
@@ -310,14 +310,13 @@ public class AES {
     public byte invRCon(byte[] key, byte round) {
         key[0] ^= round;
         if (round == 27) {
-            round = -128;
-            return round;
+            return -128;
         }
         round = (byte) ((round >> 1) & 0x7f);
         return round;
     }
 
-    public byte invAddRoundKey(byte[][] key, byte round) {
+    public byte invKeySchedule(byte[][] key, byte round) {
         byte[][] oldKey = new byte[4][4];
         for (int i = key.length - 1; i > 0; i--) {
             for (int j = 0; j < key[i].length; j++) {
@@ -335,26 +334,38 @@ public class AES {
         return round;
     }
 
-    public byte[][] encode(byte[][] message, byte[][] key) {
+    public void addRoundKey(byte[][] message, byte[][] key) {
+        for (int i = 0; i < message.length; i++) {
+            for (int j = 0; j < message[i].length; j++) {
+                message[i][j] ^= key[i][j];
+            }
+        }
+    }
+
+    public void encode(byte[][] message, byte[][] key) {
         byte round = 0;
-        for (int i = 0; i < 1; i++) {
+        addRoundKey(message, key);
+        for (int i = 0; i < 10; i++) {
             subBytes(message);
             shiftRows(message);
             mixCols(message);
             round = keySchedule(key, round);
+            addRoundKey(message, key);
         }
-        return message;
+        System.out.println("Round: " + round);
     }
 
-    public byte[][] decode(byte[][] message, byte[][] key) {
-        byte round = 0;
-        for (int i = 1; i > 0; i--) {
-            invSubBytes(message);
-
+    public void decode(byte[][] message, byte[][] key) {
+        byte round = 54;
+        for (int i = 10; i > 0; i--) {
+            addRoundKey(message, key);
             invMixCols(message);
-            round = invAddRoundKey(key, round);
+            invShiftRows(message);
+            invSubBytes(message);
+            round = invKeySchedule(key, round);
         }
-        return message;
+        addRoundKey(message, key);
+        System.out.println("Round: " + round);
     }
 
 
