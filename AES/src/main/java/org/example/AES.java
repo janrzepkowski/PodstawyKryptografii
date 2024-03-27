@@ -33,32 +33,6 @@ public class AES {
         return array;
     }
 
-    public byte[][] shiftRows(byte[][] table) {
-        byte i = 1;
-        byte temp = table[i][0];
-        table[i][0] = table[i][1];
-        table[i][1] = table[i][2];
-        table[i][2] = table[i][3];
-        table[i][3] = temp;
-        i++;
-
-        temp = table[i][0];
-        table[i][0] = table[i][2];
-        table[i][2] = temp;
-        temp = table[i][3];
-        table[i][3] = table[i][1];
-        table[i][1] = temp;
-        i++;
-
-        temp = table[i][0];
-        table[i][0] = table[i][3];
-        table[i][3] = table[i][2];
-        table[i][2] = table[i][1];
-        table[i][1] = temp;
-
-        return table;
-    }
-
     static private final char[] sbox = {
             0x63, 0x7c, 0x77, 0x7b, 0xf2, 0x6b, 0x6f, 0xc5, 0x30, 0x01, 0x67, 0x2b, 0xfe, 0xd7, 0xab, 0x76,
             0xca, 0x82, 0xc9, 0x7d, 0xfa, 0x59, 0x47, 0xf0, 0xad, 0xd4, 0xa2, 0xaf, 0x9c, 0xa4, 0x72, 0xc0,
@@ -202,6 +176,30 @@ public class AES {
             0x0c, 0x02, 0x10, 0x1e, 0x34, 0x3a, 0x28, 0x26, 0x7c, 0x72, 0x60, 0x6e, 0x44, 0x4a, 0x58, 0x56,
             0x37, 0x39, 0x2b, 0x25, 0x0f, 0x01, 0x13, 0x1d, 0x47, 0x49, 0x5b, 0x55, 0x7f, 0x71, 0x63, 0x6d,
             0xd7, 0xd9, 0xcb, 0xc5, 0xef, 0xe1, 0xf3, 0xfd, 0xa7, 0xa9, 0xbb, 0xb5, 0x9f, 0x91, 0x83, 0x8d};
+
+    public void shiftRows(byte[][] table) {
+        byte i = 1;
+        byte temp = table[0][i];
+        table[0][i] = table[1][i];
+        table[1][i] = table[2][i];
+        table[2][i] = table[3][i];
+        table[3][i] = temp;
+        i++;
+
+        temp = table[0][i];
+        table[0][i] = table[2][i];
+        table[2][i] = temp;
+        temp = table[3][i];
+        table[3][i] = table[1][i];
+        table[1][i] = temp;
+        i++;
+
+        temp = table[0][i];
+        table[0][i] = table[3][i];
+        table[3][i] = table[2][i];
+        table[2][i] = table[1][i];
+        table[1][i] = temp;
+    }
 
     public void subBytes(byte[][] table) {
         for (int i = 0; i < table.length; i++) {
