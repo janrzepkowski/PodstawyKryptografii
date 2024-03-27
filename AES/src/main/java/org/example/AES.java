@@ -345,25 +345,33 @@ public class AES {
     public void encode(byte[][] message, byte[][] key) {
         byte round = 0;
         addRoundKey(message, key);
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 9; i++) {
             subBytes(message);
             shiftRows(message);
             mixCols(message);
             round = keySchedule(key, round);
             addRoundKey(message, key);
         }
+        subBytes(message);
+        shiftRows(message);
+        round = keySchedule(key, round);
+        addRoundKey(message, key);
         System.out.println("Round: " + round);
     }
 
     public void decode(byte[][] message, byte[][] key) {
         byte round = 54;
-        for (int i = 10; i > 0; i--) {
-            addRoundKey(message, key);
-            invMixCols(message);
+        addRoundKey(message, key);
+        for (int i = 9; i > 0; i--) {
             invShiftRows(message);
             invSubBytes(message);
             round = invKeySchedule(key, round);
+            addRoundKey(message, key);
+            invMixCols(message);
         }
+        invShiftRows(message);
+        invSubBytes(message);
+        round = invKeySchedule(key, round);
         addRoundKey(message, key);
         System.out.println("Round: " + round);
     }

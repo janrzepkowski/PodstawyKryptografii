@@ -126,6 +126,10 @@ class AESTest {
 
     @Test
     void encodingTest() {
+        byte[][] baseTable = new byte[data.length][];
+        for (int i = 0; i < data.length; i++) {
+            baseTable[i] =  Arrays.copyOf(data[i], data[i].length);
+        }
         byte[][] key = {{0, 4, 8, 12}, {1, 5, 9, 13}, {2, 6, 10, 14}, {3, 7, 11, 15}};
         printTable(data);
         System.out.println();
@@ -136,5 +140,6 @@ class AESTest {
 
         aes.decode(data, key);
         printTable(data);
+        assertTrue(Arrays.deepEquals(baseTable, data));
     }
 }
