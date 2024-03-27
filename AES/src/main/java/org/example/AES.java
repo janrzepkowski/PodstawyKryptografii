@@ -201,6 +201,30 @@ public class AES {
         table[1][i] = temp;
     }
 
+    public void invShiftRows(byte[][] table) {
+        byte i = 3;
+        byte temp = table[0][i];
+        table[0][i] = table[1][i];
+        table[1][i] = table[2][i];
+        table[2][i] = table[3][i];
+        table[3][i] = temp;
+        i--;
+
+        temp = table[0][i];
+        table[0][i] = table[2][i];
+        table[2][i] = temp;
+        temp = table[3][i];
+        table[3][i] = table[1][i];
+        table[1][i] = temp;
+        i--;
+
+        temp = table[0][i];
+        table[0][i] = table[3][i];
+        table[3][i] = table[2][i];
+        table[2][i] = table[1][i];
+        table[1][i] = temp;
+    }
+
     public void subBytes(byte[][] table) {
         for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < table[i].length; j++) {
@@ -313,11 +337,22 @@ public class AES {
 
     public byte[][] encode(byte[][] message, byte[][] key) {
         byte round = 0;
-        for (int i = 0; i < 10; i++) {
-//            subBytes(message);
-//            shiftRows(message);
-//            mix(message);
-//            round = addRoundKey(key, round);
+        for (int i = 0; i < 1; i++) {
+            subBytes(message);
+            shiftRows(message);
+            mixCols(message);
+            round = keySchedule(key, round);
+        }
+        return message;
+    }
+
+    public byte[][] decode(byte[][] message, byte[][] key) {
+        byte round = 0;
+        for (int i = 1; i > 0; i--) {
+            invSubBytes(message);
+
+            invMixCols(message);
+            round = invAddRoundKey(key, round);
         }
         return message;
     }

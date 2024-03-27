@@ -23,12 +23,23 @@ class AESTest {
     byte[][] data = {{0, 1, 2, 3}, {4, 5, 6, 7}, {8, 9, 10, 11,} ,{12, 13, 14, 15}};
     @Test
     public void shiftRowsTest() {
+        byte[][] baseTable = new byte[data.length][];
+        byte[][] shiftedTable = {{0, 5, 10, 15}, {4, 9, 14, 3}, {8, 13, 2, 7}, {12, 1, 6, 11}};
+        for (int i = 0; i < data.length; i++) {
+            baseTable[i] =  Arrays.copyOf(data[i], data[i].length);
+        }
         System.out.println(data.length);
         printTable(data);
         System.out.println();
+
         aes.shiftRows(data);
         printTable(data);
-        assertTrue(true);
+        System.out.println();
+        assertTrue(Arrays.deepEquals(shiftedTable, data));
+
+        aes.invShiftRows(data);
+        printTable(data);
+        assertTrue(Arrays.deepEquals(baseTable, data));
     }
 
     @Test
@@ -43,12 +54,12 @@ class AESTest {
 
         aes.mixCols(data);
         printTable(data);
-        assertTrue(Arrays.deepEquals(data, mixedTable));
+        assertTrue(Arrays.deepEquals(mixedTable, data));
 
         aes.invMixCols(data);
         System.out.println();
         printTable(data);
-        assertTrue(Arrays.deepEquals(data, baseTable));
+        assertTrue(Arrays.deepEquals(baseTable, data));
     }
 
     @Test
