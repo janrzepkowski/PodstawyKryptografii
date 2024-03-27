@@ -3,6 +3,7 @@ package org.example;
 import org.junit.jupiter.api.Test;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -32,30 +33,22 @@ class AESTest {
 
     @Test
     public void mixColumns() {
-//        printTable(data);
-//        System.out.println();
-//        aes.mixColumns(data[0]);
-//        printTable(data);
-//        char[] d = {45, 38, 49, 76};
-//        byte[] d = {1, 1, 1, 1};
-        byte[] d = {(byte) 242, 10, 34, 92};
-//        char[] d = {198, 198, 198, 198};
-        for (byte b : d) {
-            int b1 = b;
-            System.out.print(b1 + " ");
+        byte[][] baseTable = new byte[data.length][];
+        byte[][] mixedTable = {{2, 7, 0, 5}, {6, 3, 4, 1}, {10, 15, 8, 13}, {14, 11, 12, 9}};
+        for (int i = 0; i < data.length; i++) {
+            baseTable[i] =  Arrays.copyOf(data[i], data[i].length);
         }
+        printTable(data);
         System.out.println();
-        byte[] da = aes.mix(d);
-        for (byte b : da) {
-            int b1 = b;
-            System.out.print(b1 + " ");
-        }
+
+        aes.mixCols(data);
+        printTable(data);
+        assertTrue(Arrays.deepEquals(data, mixedTable));
+
+        aes.invMixCols(data);
         System.out.println();
-        byte[] f = aes.cols(da);
-        for (byte b : f) {
-            int b1 = b;
-            System.out.print(b1 + " ");
-        }
+        printTable(data);
+        assertTrue(Arrays.deepEquals(data, baseTable));
     }
 
     @Test
@@ -95,16 +88,17 @@ class AESTest {
     void rCon() {
         int[] values = {1, 2, 4, 8, 16, 32, 64, -128, 27, 54};
         int[] xoredValues = {3, 1, 5, 13, 29, 61, 125, -3, -26, -48};
+        byte[] testData = {2, 6, 10, 14};
         byte val = 0;
         for (byte i = 0; i < 10; i++) {
-            val = aes.rCon(data[3], val);
+            val = aes.rCon(testData, val);
             assertEquals(values[i], val);
-            assertEquals(data[3][0], xoredValues[i]);
+            assertEquals(xoredValues[i], testData[0]);
         }
         for (byte i = 0; i < 10; i++) {
             assertEquals(values[9 - i], val);
-            assertEquals(xoredValues[9 - i], data[3][0]);
-            val = aes.invRCon(data[3], val);
+            assertEquals(xoredValues[9 - i], testData[0]);
+            val = aes.invRCon(testData, val);
         }
     }
 

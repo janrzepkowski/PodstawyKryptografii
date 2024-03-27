@@ -217,25 +217,29 @@ public class AES {
         }
     }
 
-    public byte[] mix(byte[] table) {
-        byte[] mix = new byte[4];
-        for (int i = 0; i < mix.length; i++) {
-            mix[i] = (byte) ((multiply2[Byte.toUnsignedInt(table[i])] ^
-                    multiply3[Byte.toUnsignedInt(table[(i + 1) % 4])] ^
-                    table[(i + 2) % 4] ^ table[(i + 3) % 4]));
+    public void mixCols(byte[][] table) {
+        byte[][] mix = new byte[4][4];
+        for (int i = 0; i < table.length; i ++) {
+            for (int j = 0; j < mix.length; j++) {
+                mix[i][j] = (byte) ((multiply2[Byte.toUnsignedInt(table[i][j])] ^
+                        multiply3[Byte.toUnsignedInt(table[i][(j + 1) % 4])] ^
+                        table[i][(j + 2) % 4] ^ table[i][(j + 3) % 4]));
+            }
+            table[i] = mix[i];
         }
-        return mix;
     }
 
-    public byte[] cols(byte[] table) {
-        byte[] mix = new byte[4];
-        for (int i = 0; i < mix.length; i++) {
-            mix[i] = (byte) (multiply14[Byte.toUnsignedInt(table[i])] ^
-                    multiply13[Byte.toUnsignedInt(table[(i + 2) % 4])] ^
-                    multiply11[Byte.toUnsignedInt(table[(i + 1) % 4])] ^
-                    multiply9[Byte.toUnsignedInt(table[(i + 3) % 4])]);
+    public void invMixCols(byte[][] table) {
+        byte[][] mix = new byte[4][4];
+        for (int i = 0; i < table.length; i++) {
+            for (int j = 0; j < table[i].length; j++) {
+                mix[i][j] = (byte) (multiply14[Byte.toUnsignedInt(table[i][j])] ^
+                        multiply13[Byte.toUnsignedInt(table[i][(j + 2) % 4])] ^
+                        multiply11[Byte.toUnsignedInt(table[i][(j + 1) % 4])] ^
+                        multiply9[Byte.toUnsignedInt(table[i][(j + 3) % 4])]);
+            }
+            table[i] = mix[i];
         }
-        return mix;
     }
 
     private byte[] rotWord(byte[] key) {
@@ -253,12 +257,12 @@ public class AES {
     }
 
     public byte rCon(byte[] key, byte round) {
-        if (round == 0) {
-            return 1;
-        }
         byte a = (byte) ((round >> 7) & 1);
         round = (byte) (round << 1);
         round ^= (byte) (a * 0x11b);
+        if (round == 0) {
+            round = 1;
+        }
         key[0] ^= round;
         return round;
     }
