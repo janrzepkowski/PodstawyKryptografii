@@ -3,6 +3,7 @@ package org.example;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 
 public class AES {
     private int nw;                         //Number of 32 bit words
@@ -24,7 +25,7 @@ public class AES {
     }
 
     public byte[][] array1Dto2D(byte[] table, int y, int x) {
-        byte [][] array = new byte[y][x];
+        byte[][] array = new byte[y][x];
         for (int i = 0; i < x; i++) {
             for (int j = 0; j < y; j++) {
                 array[j][i] = table[(i * y) + j];
@@ -243,7 +244,7 @@ public class AES {
 
     public void mixCols(byte[][] table) {
         byte[][] mix = new byte[4][4];
-        for (int i = 0; i < table.length; i ++) {
+        for (int i = 0; i < table.length; i++) {
             for (int j = 0; j < mix.length; j++) {
                 mix[i][j] = (byte) ((multiply2[Byte.toUnsignedInt(table[i][j])] ^
                         multiply3[Byte.toUnsignedInt(table[i][(j + 1) % 4])] ^
@@ -342,6 +343,99 @@ public class AES {
         }
     }
 
+    public byte[][] genKeySchedule128(byte[][] key) {
+        byte[][] keySchedule = new byte[44][];
+        for (int i = 0; i < key.length; i++) {
+            keySchedule[i] = Arrays.copyOf(key[i], key[i].length);
+        }
+        byte roundConstant = 1;
+        int columnNumber = 4;
+        for (int i = columnNumber; i < 44; i++) {
+            if (i % columnNumber == 0) {
+                keySchedule[i] = transform(keySchedule[i - 1], roundConstant);
+                keySchedule[i] = addWords(keySchedule[i], keySchedule[i - columnNumber]);
+                roundConstant = doubleRConstant(roundConstant);
+            } else {
+                keySchedule[i] = addWords(keySchedule[i - 1], keySchedule[i - columnNumber]);
+            }
+        }
+        return keySchedule;
+    }
+
+    public byte[] addWords(byte[] prevWord, byte[] lastRoundWord) {
+        byte[] word = new byte[lastRoundWord.length];
+        for (int i = 0; i < lastRoundWord.length; i++) {
+            word[i] = (byte) (lastRoundWord[i] ^ prevWord[i]);
+        }
+        return word;
+    }
+
+    public byte doubleRConstant(byte roundConstant) {
+        byte a = (byte) ((roundConstant >> 7) & 1);
+        roundConstant = (byte) (roundConstant << 1);
+        roundConstant ^= (byte) (a * 0x11b);
+        return roundConstant;
+    }
+
+    public byte[] transform(byte[] word, byte roundConstant) {
+        byte[] transformedWord = rotWord(word);
+        subWord(transformedWord);
+        transformedWord[0] ^= roundConstant;
+        return transformedWord;
+    }
+
+    public void encodeExpansion(byte[][] message, byte[][] key) {
+        int keySize = key.length;
+        byte[][] keyExpansion = new byte[0][];
+        if (keySize == 4) {
+            keyExpansion = genKeySchedule128(key);
+        }
+        int rounds = keyExpansion.length / keySize;
+        byte[][] roundKey;
+        int startIndex;
+        addRoundKey(message, key);
+        for (int i = 0; i < rounds - 2; i++) {
+            subBytes(message);
+            shiftRows(message);
+            mixCols(message);
+            startIndex = i * 4 + 4;
+            roundKey = Arrays.copyOfRange(keyExpansion, startIndex, startIndex + 4);
+            addRoundKey(message, roundKey);
+            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
+        }
+        subBytes(message);
+        shiftRows(message);
+        startIndex = keyExpansion.length - 4;
+        roundKey = Arrays.copyOfRange(keyExpansion, startIndex, keyExpansion.length);
+        addRoundKey(message, roundKey);
+    }
+
+    public void decodeExpansion(byte[][] message, byte[][] key) {
+        int keySize = key.length;
+        byte[][] keyExpansion = new byte[0][];
+        if (keySize == 4) {
+            keyExpansion = genKeySchedule128(key);
+        }
+        int rounds = keyExpansion.length / keySize;
+        byte[][] roundKey;
+        int startIndex = keyExpansion.length - 4;
+        System.out.println(rounds + " " + startIndex + " " + keyExpansion.length);
+        roundKey = Arrays.copyOfRange(keyExpansion, startIndex, keyExpansion.length);
+        addRoundKey(message, roundKey);
+        for (int i = rounds - 2; i > 0; i--) {
+            invShiftRows(message);
+            invSubBytes(message);
+            startIndex = i * 4;
+            System.out.println(i + " " + rounds + " " + startIndex + " " + keyExpansion.length);
+            roundKey = Arrays.copyOfRange(keyExpansion, startIndex, startIndex + 4);
+            addRoundKey(message, roundKey);
+            invMixCols(message);
+        }
+        invShiftRows(message);
+        invSubBytes(message);
+        addRoundKey(message, key);
+    }
+
     public void encode(byte[][] message, byte[][] key) {
         byte round = 0;
         addRoundKey(message, key);
@@ -378,7 +472,7 @@ public class AES {
 
 
     public byte[][] subBytes1(byte[][] table) {
-        byte [][] modifiedTable = new byte[4][4];
+        byte[][] modifiedTable = new byte[4][4];
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 //do modified table przypisywane sa odpowiednie wartosci,
@@ -431,7 +525,7 @@ public class AES {
             {0x8c, 0xa1, 0x89, 0x0d, 0xbf, 0xe6, 0x42, 0x68, 0x41, 0x99, 0x2d, 0x0f, 0xb0, 0x54, 0xbb, 0x16}
     };
 
-    public int [][] invSBox = {
+    public int[][] invSBox = {
             {0x52, 0x09, 0x6a, 0xd5, 0x30, 0x36, 0xa5, 0x38, 0xbf, 0x40, 0xa3, 0x9e, 0x81, 0xf3, 0xd7, 0xfb},
             {0x7c, 0xe3, 0x39, 0x82, 0x9b, 0x2f, 0xff, 0x87, 0x34, 0x8e, 0x43, 0x44, 0xc4, 0xde, 0xe9, 0xcb},
             {0x54, 0x7b, 0x94, 0x32, 0xa6, 0xc2, 0x23, 0x3d, 0xee, 0x4c, 0x95, 0x0b, 0x42, 0xfa, 0xc3, 0x4e},

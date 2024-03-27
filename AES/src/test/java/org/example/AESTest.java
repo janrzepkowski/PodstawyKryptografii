@@ -16,6 +16,7 @@ class AESTest {
             }
             System.out.println();
         }
+        System.out.println();
     }
 
     AES aes = new AES();
@@ -117,11 +118,13 @@ class AESTest {
     void addKeyRound() {
         byte[][] key = {{0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}, {0, 0, 0, 0}};
         printTable(key);
-        byte round = 1;
+        byte round = 0;
         round = aes.keySchedule(key, round);
         printTable(key);
         aes.invKeySchedule(key, round);
+        System.out.println();
         printTable(key);
+//        printTable(aes.genKeySchedule128(key));
     }
 
     @Test
@@ -135,11 +138,21 @@ class AESTest {
         System.out.println();
 
         aes.encode(data, key);
+        byte[][] encodedData = new byte[data.length][];
+        for (int i = 0; i < data.length; i++) {
+            encodedData[i] =  Arrays.copyOf(data[i], data[i].length);
+        }
         printTable(data);
         System.out.println();
 
         aes.decode(data, key);
         printTable(data);
         assertTrue(Arrays.deepEquals(baseTable, data));
+        aes.encodeExpansion(data, key);
+        assertTrue(Arrays.deepEquals(encodedData, data));
+        aes.decodeExpansion(data, key);
+        printTable(data);
+        assertTrue(Arrays.deepEquals(baseTable, data));
+
     }
 }
