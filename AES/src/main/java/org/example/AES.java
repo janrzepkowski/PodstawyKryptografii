@@ -281,60 +281,6 @@ public class AES {
         }
     }
 
-    public byte rCon(byte[] key, byte round) {
-        byte a = (byte) ((round >> 7) & 1);
-        round = (byte) (round << 1);
-        round ^= (byte) (a * 0x11b);
-        if (round == 0) {
-            round = 1;
-        }
-        key[0] ^= round;
-        return round;
-    }
-
-    public byte keySchedule(byte[][] key, byte round) { // TODO generate key to table for x rounds
-        byte[][] newKey = new byte[4][4];
-        byte[] lastWord = rotWord(key[3]);
-        subWord(lastWord);
-        round = rCon(lastWord, round);
-        for (int i = 0; i < key.length; i++) {
-            for (int j = 0; j < key[i].length; j++) {
-                newKey[i][j] = (byte) (lastWord[j] ^ key[i][j]);
-            }
-            lastWord = newKey[i];
-        }
-        System.arraycopy(newKey, 0, key, 0, key.length);
-
-        return round;
-    }
-
-    public byte invRCon(byte[] key, byte round) {
-        key[0] ^= round;
-        if (round == 27) {
-            return -128;
-        }
-        round = (byte) ((round >> 1) & 0x7f);
-        return round;
-    }
-
-    public byte invKeySchedule(byte[][] key, byte round) {
-        byte[][] oldKey = new byte[4][4];
-        for (int i = key.length - 1; i > 0; i--) {
-            for (int j = 0; j < key[i].length; j++) {
-                oldKey[i][j] = (byte) (key[i][j] ^ key[i - 1][j]);
-            }
-        }
-        byte[] lastWord = rotWord(oldKey[3]);
-        subWord(lastWord);
-        round = invRCon(lastWord, round);
-        for (int j = 0; j < key[0].length; j++) {
-            oldKey[0][j] = (byte) (lastWord[j] ^ key[0][j]);
-
-        }
-        System.arraycopy(oldKey, 0, key, 0, key.length);
-        return round;
-    }
-
     public void addRoundKey(byte[][] message, byte[][] key) {
         for (int i = 0; i < message.length; i++) {
             for (int j = 0; j < message[i].length; j++) {
@@ -343,8 +289,11 @@ public class AES {
         }
     }
 
-    public byte[][] genKeySchedule(byte[][] key) {
+    public byte[][] expandKey(byte[][] key) {
         int columnNumber = key.length;
+        if (!(columnNumber == 4 || columnNumber == 6 || columnNumber == 8)) {
+            throw new IllegalArgumentException("Wrong number of columns");
+        }
         int initialSize = 44;
         int size = initialSize + (columnNumber - 4) * 4;
         byte[][] keySchedule = new byte[size][];
@@ -356,7 +305,7 @@ public class AES {
             if (i % columnNumber == 0) {
                 keySchedule[i] = transform(keySchedule[i - 1], roundConstant);
                 keySchedule[i] = addWords(keySchedule[i], keySchedule[i - columnNumber]);
-                roundConstant = doubleRConstant(roundConstant);
+                roundConstant = doubleConstant(roundConstant);
             } else {
                 keySchedule[i] = addWords(keySchedule[i - 1], keySchedule[i - columnNumber]);
             }
@@ -372,7 +321,7 @@ public class AES {
         return word;
     }
 
-    public byte doubleRConstant(byte roundConstant) {
+    public byte doubleConstant(byte roundConstant) {
         byte a = (byte) ((roundConstant >> 7) & 1);
         roundConstant = (byte) (roundConstant << 1);
         roundConstant ^= (byte) (a * 0x11b);
@@ -386,11 +335,11 @@ public class AES {
         return transformedWord;
     }
 
-    public void encodeExpansion(byte[][] message, byte[][] key) {
+    public void encode(byte[][] message, byte[][] key) {
         int keySize = key.length;
         byte[][] keyExpansion;
         if (keySize == 4 || keySize == 6 || keySize == 8) {
-            keyExpansion = genKeySchedule(key);
+            keyExpansion = expandKey(key);
         } else {
             throw new IllegalArgumentException("Wrong key size");
         }
@@ -416,11 +365,11 @@ public class AES {
         addRoundKey(message, roundKey);
     }
 
-    public void decodeExpansion(byte[][] message, byte[][] key) {
+    public void decode(byte[][] message, byte[][] key) {
         int keySize = key.length;
         byte[][] keyExpansion;
         if (keySize == 4 || keySize == 6 || keySize == 8) {
-            keyExpansion = genKeySchedule(key);
+            keyExpansion = expandKey(key);
         } else {
             throw new IllegalArgumentException("Wrong key size");
         }
@@ -444,41 +393,6 @@ public class AES {
         invSubBytes(message);
         addRoundKey(message, key);
     }
-
-    public void encode(byte[][] message, byte[][] key) {
-        byte round = 0;
-        addRoundKey(message, key);
-        for (int i = 0; i < 9; i++) {
-            subBytes(message);
-            shiftRows(message);
-            mixCols(message);
-            round = keySchedule(key, round);
-            addRoundKey(message, key);
-        }
-        subBytes(message);
-        shiftRows(message);
-        round = keySchedule(key, round);
-        addRoundKey(message, key);
-        System.out.println("Round: " + round);
-    }
-
-    public void decode(byte[][] message, byte[][] key) {
-        byte round = 54;
-        addRoundKey(message, key);
-        for (int i = 9; i > 0; i--) {
-            invShiftRows(message);
-            invSubBytes(message);
-            round = invKeySchedule(key, round);
-            addRoundKey(message, key);
-            invMixCols(message);
-        }
-        invShiftRows(message);
-        invSubBytes(message);
-        round = invKeySchedule(key, round);
-        addRoundKey(message, key);
-        System.out.println("Round: " + round);
-    }
-
 
     public byte[][] subBytes1(byte[][] table) {
         byte[][] modifiedTable = new byte[4][4];
