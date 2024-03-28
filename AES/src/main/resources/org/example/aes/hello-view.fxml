@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.layout.VBox?>
-
 <?import javafx.scene.control.Button?>
-<VBox alignment="CENTER" spacing="20.0" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="org.example.aes.AESController">
-    <padding>
-        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
-    </padding>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.ChoiceBox?>
 
-    <Label fx:id="welcomeText"/>
-    <Button text="Hello!" onAction="#onHelloButtonClick"/>
-</VBox>
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="900" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.example.aes.AESController">
+    <children>
+        <Button layoutX="552.0" layoutY="118.0" mnemonicParsing="false" onAction="#keyGenerator" prefHeight="25.0" prefWidth="144.0" text="Generuj losowy klucz" />
+        <TextArea fx:id="unecryptedText" layoutX="74.0" layoutY="258.0" prefHeight="200.0" prefWidth="230.0" />
+        <TextArea fx:id="ecryptedText" layoutX="571.0" layoutY="258.0" prefHeight="200.0" prefWidth="230.0" />
+<!--        <Button layoutX="392.0" layoutY="308.0" mnemonicParsing="false" onAction="#encryptButton" prefHeight="25.0" prefWidth="110.0" text="Szyfruj" />-->
+<!--        <Button layoutX="392.0" layoutY="390.0" mnemonicParsing="false" onAction="#unecryptButton" prefHeight="25.0" prefWidth="110.0" text="Deszyfruj" />-->
+        <Text layoutX="304.0" layoutY="78.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Wybierz długość klucza" wrappingWidth="144.0" />
+        <ChoiceBox fx:id="keyLengthChoice" layoutX="474.0" layoutY="61.0" prefWidth="150.0" />
+        <TextArea fx:id="keyInput" layoutX="95.0" layoutY="111.0" prefHeight="0.0" prefWidth="417.0" />
+        <Button layoutX="335.0" layoutY="195.0" mnemonicParsing="false" onAction="#loadFile" text="Wczytaj plik " />
+<!--        <Button layoutX="335.0" layoutY="522.0" mnemonicParsing="false" onAction="#saveFile" prefHeight="25.0" prefWidth="77.0" text="Zapisz plik" />-->
+        <Text layoutX="438.0" layoutY="212.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Wczytaj plik lub wpisz tekst ręcznie" />
+        <Text layoutX="432.0" layoutY="539.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Zapisz plik lub tekst wpisany ręcznie" />
+        <!-- <Button layoutX="775.0" layoutY="99.0" mnemonicParsing="false" onAction="#loadKey" text="Wczytaj klucz" />
+        <Button layoutX="779.0" layoutY="137.0" mnemonicParsing="false" onAction="#saveKey" text="Zapisz klucz" /> -->
+        <Text layoutX="158.0" layoutY="247.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tekst jawny" />
+        <Text layoutX="635.0" layoutY="247.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Tekst zaszyfrowany" />
+    </children>
+</AnchorPane>

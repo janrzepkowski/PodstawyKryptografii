@@ -14,7 +14,7 @@ public class AES {
         return secretKey.getEncoded();
     }
 
-    private String byteArraytoString(byte[] keyBytes) {
+    public String byteArraytoString(byte[] keyBytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : keyBytes) {
             sb.append(String.format("%02X", b));
