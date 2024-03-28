@@ -1,4 +1,4 @@
-package org.example;
+package org.example.aes;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -6,8 +6,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
 public class AES {
-    private int nw;                         //Number of 32 bit words
-    private int nr;                         //Number of rounds in encipher
 
     public byte[] generateKey(int size) throws NoSuchAlgorithmException {
         KeyGenerator keyGen = KeyGenerator.getInstance("AES");
